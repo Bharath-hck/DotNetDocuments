@@ -15,17 +15,17 @@ In this chapter, You will learn about the below C# Operators:
 Operators that perform arithmetic operations with numeric operands
 
 * Unary:
- 	* (++) increment
+	* (++) increment
 	* (--) decrement
 	* (+) plus)
 	* (-) minus)
 
 * Binary:
-    * (*) multiplication
-    * (/) division
-    * (%) remainder
-    * (+) addition
-    * (-) subtraction
+	* (*) multiplication
+	* (/) division
+	* (%) remainder
+	* (+) addition
+	* (-) subtraction
 
 #### Increment Operator (++)
 * The unary increment operator `++` increments its operand by `1`. 
@@ -39,7 +39,6 @@ Operators that perform arithmetic operations with numeric operands
 
 The result of `x++` is the value of `x` before the operation, as the following example shows:
 
-
 ```csharp
 int i = 3;
 Console.WriteLine(i);   // output: 3
@@ -47,7 +46,16 @@ Console.WriteLine(i++); // output: 3
 Console.WriteLine(i);   // output: 4
 ```
 
+##### Prefix Increment Operator
 
+The result of `++x` is the value of `x` after the operation, as the following example shows:
+
+```csharp
+int i = 3;
+Console.WriteLine(i);   // output: 3
+Console.WriteLine(++i); // output: 4
+Console.WriteLine(i);   // output: 4
+```
 
 
 
