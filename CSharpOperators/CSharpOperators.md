@@ -29,6 +29,19 @@ In this chapter, You will learn about the below C# Operators:
       - [Logical Exclusive OR Operator](#logical-exclusive-or-operator)
       - [Conditional Logical AND Operator](#conditional-logical-and-operator)
       - [Conditional Logical OR Operator](#conditional-logical-or-operator)
+    - [Bitwise and Shift Operators](#bitwise-and-shift-operators)
+      - [Bitwise Complement Operator](#bitwise-complement-operator)
+      - [Left-Shit Operator](#left-shit-operator)
+      - [Right-Shit Operator](#right-shit-operator)
+      - [Unsigned Right-Shift Operator](#unsigned-right-shift-operator)
+      - [Logical AND Operator](#logical-and-operator-1)
+      - [Logical OR Operator](#logical-or-operator-1)
+      - [Logical Exclusive OR Operator](#logical-exclusive-or-operator-1)
+    - [Equality Operators](#equality-operators)
+      - [Equality Operator](#equality-operator)
+        - [Value types equality](#value-types-equality)
+        - [Reference types equality](#reference-types-equality)
+      - [Inequality Operator](#inequality-operator)
 
 ### Arithmetic Operators 
 
@@ -357,3 +370,182 @@ Console.WriteLine(b);
 // True
 ```
 
+### Bitwise and Shift Operators 
+
+Bitwise and shift operators includes the below:
+
+* Unary
+  * `~` Bitwise Complement Operator
+* Binary
+  * `<<` Left Shift, `>>` Right Shift, `>>>` Unsigned Right Shift
+  * `&` Logical AND, `|` Logical OR, `^` Logical Exclusive OR
+
+#### Bitwise Complement Operator
+
+Bitwise Complement operator is represented by `~`. It is a unary operator, i.e. operates on only one operand. The `~` operator *inverts* each bits i.e. changes `1` to `0` and `0` to `1`.
+
+```cs
+uint a = 0b_0000_1111_0000_1111_0000_1111_0000_1100;
+uint b = ~a;
+Console.WriteLine(Convert.ToString(b, toBase: 2));
+// Output:
+// 11110000111100001111000011110011
+```
+#### Left-Shit Operator
+
+The `<<` operator shifts its left-hand operand left by the number of bits defined by its right-hand operand. The left-shift operation discards the high-order bits that are outside the range of the result type and sets the low-order empty bit positions to zero.
+
+```cs
+uint x = 0b_1100_1001_0000_0000_0000_0000_0001_0001;
+Console.WriteLine($"Before: {Convert.ToString(x, toBase: 2)}");
+
+uint y = x << 4;
+Console.WriteLine($"After:  {Convert.ToString(y, toBase: 2)}");
+// Output:
+// Before: 11001001000000000000000000010001
+// After:  10010000000000000000000100010000
+```
+
+#### Right-Shit Operator
+
+The >> operator shifts its left-hand operand right by the number of bits defined by its right-hand operand. The right-shift operation discards the low-order bits.
+
+```cs
+uint x = 0b_1001;
+Console.WriteLine($"Before: {Convert.ToString(x, toBase: 2), 4}");
+
+uint y = x >> 2;
+Console.WriteLine($"After:  {Convert.ToString(y, toBase: 2).PadLeft(4, '0'), 4}");
+// Output:
+// Before: 1001
+// After:  0010
+```
+
+#### Unsigned Right-Shift Operator
+
+Available in C# 11 and later, the `>>>` operator shifts its left-hand operand right by the number of bits defined by its right-hand operand. 
+
+The `>>>` operator always performs a *logical shift*. That is, the high-order empty bit positions are always set to zero, regardless of the type of the left-hand operand. 
+
+The `>>` operator performs an *arithmetic shift* (that is, the value of the most significant bit is propagated to the high-order empty bit positions) if the left-hand operand is of a signed type. 
+
+```cs
+int x = -8;
+Console.WriteLine($"Before     {":",14} {Convert.ToString(x, toBase: 2),32}");
+
+int y = x >> 2;
+Console.WriteLine($"After x>>2 {":",14} {Convert.ToString(y, toBase: 2),32}");
+
+int z = x >>> 2;
+Console.WriteLine($"After x>>>2{":",14} {Convert.ToString(z, toBase: 2).PadLeft(32, '0'),32}");
+
+// Output:
+// Before                   : 11111111111111111111111111111000
+// After x>> 2              : 11111111111111111111111111111110
+// After x>>> 2             : 00111111111111111111111111111110
+```
+
+#### Logical AND Operator
+
+The `&` operator computes the bitwise logical AND of its integral operands:
+
+```cs
+uint a = 0b_1111_1000;
+uint b = 0b_1001_1101;
+uint c = a & b;
+Console.WriteLine(Convert.ToString(c, toBase: 2));
+// Output:
+// 10011000
+```
+
+#### Logical OR Operator
+
+The `|` operator computes the bitwise logical OR of its integral operands:
+
+```cs
+uint a = 0b_1010_0000;
+uint b = 0b_1001_0001;
+uint c = a | b;
+Console.WriteLine(Convert.ToString(c, toBase: 2));
+// Output:
+// 10110001
+```
+
+#### Logical Exclusive OR Operator
+
+The `^` operator computes the bitwise logical exclusive OR, also known as the bitwise logical XOR, of its integral operands:
+
+```cs
+uint a = 0b_1111_1000;
+uint b = 0b_0001_1100;
+uint c = a ^ b;
+Console.WriteLine(Convert.ToString(c, toBase: 2));
+// Output:
+// 11100100
+```
+
+### Equality Operators
+
+The `==` (equality) and `!=` (inequality) operators check if their operands are equal or not. Value types are equal when their contents are equal. Reference types are equal when the two variables refer to the same storage.
+
+#### Equality Operator
+
+The equality operator `==` returns `true` if its operands are equal, `false` otherwise.
+
+##### Value types equality
+
+Operands of the built-in value types are equal if their values are equal:
+
+```cs
+int a = 1 + 2 + 3;
+int b = 6;
+Console.WriteLine(a == b);  // output: True
+
+char c1 = 'a';
+char c2 = 'A';
+Console.WriteLine(c1 == c2);  // output: False
+Console.WriteLine(c1 == char.ToLower(c2));  // output: True
+```
+##### Reference types equality
+
+By default, two non-record reference-type operands are equal if they refer to the same object:
+
+```cs
+public class Program
+{
+    public class MyClass
+    {
+        private int id;
+        public MyClass(int id) => this.id = id;
+    }
+
+    static void Main()
+    {
+        var a = new MyClass(1);
+        var b = new MyClass(1);
+        var c = a;
+        Console.WriteLine(a == b);  // output: False
+        Console.WriteLine(a == c);  // output: True
+    }
+}
+```
+
+#### Inequality Operator
+
+The inequality operator `!=` returns `true` if its operands aren't equal, `false` otherwise. For the operands of the built-in types, the expression `x != y` produces the same result as the expression `!(x == y)`
+
+The following example demonstrates the usage of the `!=` operator:
+
+```cs
+int a = 1 + 1 + 2 + 3;
+int b = 6;
+Console.WriteLine(a != b);  // output: True
+
+string s1 = "Hello";
+string s2 = "Hello";
+Console.WriteLine(s1 != s2);  // output: False
+
+object o1 = 1;
+object o2 = 1;
+Console.WriteLine(o1 != o2);  // output: True
+```
