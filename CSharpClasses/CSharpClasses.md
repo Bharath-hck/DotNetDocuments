@@ -1,8 +1,8 @@
-# C# Program Structure
+# C# Classes
 
 In this chapter, You will learn about the below C# Classes:
 
-- [C# Program Structure](#c-program-structure)
+- [C# Classes](#c-classes)
     - [Declaring Classes](#declaring-classes)
     - [Creating objects](#creating-objects)
     - [Class inheritance](#class-inheritance)
