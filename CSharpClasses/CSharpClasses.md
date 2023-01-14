@@ -27,6 +27,17 @@ public class Customer
 
 A class and an object are different things. A class defines a type of object, but it is not an object itself. An object is a concrete entity based on a class, and is sometimes referred to as an instance of a class.
 
+Object is a basic unit of Object-Oriented Programming and represents real-life entities. A typical C# program creates many objects, which as you know, interact by invoking methods. An object consists of : 
+
+* **State**: It is represented by attributes of an object. It also reflects the properties of an object.
+* **Behavior**: It is represented by the methods of an object. It also reflects the response of an object with other objects.
+* **Identity**: It gives a unique name to an object and enables one object to interact with other objects.
+
+Consider Dog as an object and see the below diagram for its identity, state, and behavior:
+
+![Object](../CSharpClasses/Images/Obj.jpg)
+
+
 Objects can be created by using the new keyword followed by the name of the class that the object will be based on, like this:
 
 ```cs
