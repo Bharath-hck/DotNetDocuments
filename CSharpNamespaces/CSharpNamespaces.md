@@ -39,8 +39,7 @@ class AnotherSampleClass
 {
     public void AnotherSampleMethod()
     {
-        System.Console.WriteLine(
-            "SampleMethod inside SampleNamespace");
+        System.Console.WriteLine("SampleMethod inside SampleNamespace");
     }
 }
 ```
@@ -72,7 +71,6 @@ You can define one namespace inside another namespace as follows:
 
 ```cs
 namespace namespace_name1 {
-   
    // code declarations
    namespace namespace_name2 {
       // code declarations
