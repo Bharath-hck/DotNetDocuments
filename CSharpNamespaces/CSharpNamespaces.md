@@ -2,13 +2,6 @@
 
 In this chapter, You will learn about the below C# Namespaces: 
 
-- [C# Namespaces](#c-namespaces)
-    - [Declaring a namespace](#declaring-a-namespace)
-    - [Namespaces overview](#namespaces-overview)
-    - [The using Keyword](#the-using-keyword)
-    - [Nested Namespaces](#nested-namespaces)
-
-
 C# programs are organized using `namespaces`. Namespaces are used both as an “internal” organization system for a program, and as an “external” organization system—a way of presenting program elements that are exposed to other programs.
 
 Namespaces are used in two ways in C# programming:
