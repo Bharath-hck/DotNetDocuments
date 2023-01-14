@@ -26,9 +26,7 @@ public class Customer
 
 ### Creating objects
 
-A class and an object are different things. A class defines a type of object, but it is not an object itself. An object is a concrete entity based on a class, and is sometimes referred to as an instance of a class.
-
-Object is a basic unit of Object-Oriented Programming and represents real-life entities. A typical C# program creates many objects, which as you know, interact by invoking methods. An object consists of : 
+A class and an object are different things. A class defines a type of object, but it is not an object itself. Object is a basic unit of Object-Oriented Programming and represents real-life entities. A typical C# program creates many objects, which as you know, interact by invoking methods. An object consists of : 
 
 * **State**: It is represented by attributes of an object. It also reflects the properties of an object.
 * **Behavior**: It is represented by the methods of an object. It also reflects the response of an object with other objects.
@@ -62,7 +60,7 @@ Customer object2 = object1;
 
  ### Class inheritance
 
- Classes fully support `inheritance`, a fundamental characteristic of object-oriented programming. When you create a class, you can inherit from any other class that is not defined as `sealed`, and other classes can inherit from your class and `override` class `virtual` methods. Furthermore, you can implement one or more interfaces.
+ Classes fully support `inheritance`, a fundamental characteristic of object-oriented programming. When you create a class, you can inherit from any other class and other classes can inherit from your class and `override` class `virtual` methods.
 
 ```cs
 public class Manager : Employee
