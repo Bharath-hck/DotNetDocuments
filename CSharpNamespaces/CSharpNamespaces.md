@@ -5,6 +5,8 @@ In this chapter, You will learn about the below C# Namespaces:
 - [C# Namespaces](#c-namespaces)
     - [Declaring a namespace](#declaring-a-namespace)
     - [Namespaces overview](#namespaces-overview)
+    - [The using Keyword](#the-using-keyword)
+    - [Nested Namespaces](#nested-namespaces)
 
 
 C# programs are organized using `namespaces`. Namespaces are used both as an “internal” organization system for a program, and as an “external” organization system—a way of presenting program elements that are exposed to other programs.
@@ -57,3 +59,31 @@ Namespaces have the following properties:
 * They're delimited by using the `.` operator.
 * The `using` directive obviates the requirement to specify the name of the namespace for every class.
 * The global namespace is the "root" namespace: `global::System` will always refer to the .NET System namespace.
+
+### The using Keyword
+
+The `using` keyword states that the program is using the names in the given namespace. For example, we are using the `System` namespace in our programs.
+
+The class `Console` is defined there. We just write:
+```cs
+Console.WriteLine ("Hello there");
+```
+
+We could have written the fully qualified name as:
+```cs
+System.Console.WriteLine("Hello there");
+```
+
+### Nested Namespaces
+You can define one namespace inside another namespace as follows:
+
+```cs
+namespace namespace_name1 {
+   
+   // code declarations
+   namespace namespace_name2 {
+      // code declarations
+   }
+}
+```
+
