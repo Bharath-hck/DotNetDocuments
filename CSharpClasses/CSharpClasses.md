@@ -7,6 +7,7 @@ In this chapter, You will learn about the below C# Classes:
     - [Creating objects](#creating-objects)
     - [Class inheritance](#class-inheritance)
       - [Points to remember](#points-to-remember)
+    - [Why Objects and Classes?](#why-objects-and-classes)
 
 A type that is defined as a class is a **reference** type. At run time, when you declare a variable of a reference type, the variable contains the value `null` until you explicitly create an instance of the class by using the `new` operator. When the object is created, enough memory is allocated on the managed heap for that specific object, and the variable holds only a reference to the location of said object. 
 
@@ -124,3 +125,16 @@ Kumar
 Madhavaram
 */
 ```
+
+### Why Objects and Classes?
+`Objects` and `classes` help us to divide a large project into smaller sub-problems.
+
+Suppose you want to create a game that has hundreds of enemies and each of them has fields like `health`, `ammo`, and methods like `shoot()` and `run()`.
+
+With OOP we can create a single `Enemy` class with required fields and methods. Then, we can create multiple enemy objects from it.
+
+Each of the enemy objects will have its own version of `health` and `ammo` fields. And, they can use the common `shoot()` and `run()` methods.
+
+Now, instead of thinking of projects in terms of variables and methods, we can think of them in terms of objects.
+
+This helps to manage complexity as well as make our code reusable.
