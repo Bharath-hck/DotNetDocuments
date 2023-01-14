@@ -2,6 +2,18 @@
 
 In this chapter, You will learn about the below C# Program Structure: 
 
+- [C# Program Structure](#c-program-structure)
+    - [General Structure of C# Program](#general-structure-of-c-program)
+    - [Main() method and Command Line Arguments](#main-method-and-command-line-arguments)
+      - [Points to remember](#points-to-remember)
+      - [Command Line Arguments](#command-line-arguments)
+    - [Top Level Statements (programs without `Main` method)](#top-level-statements-programs-without-main-method)
+      - [using directives](#using-directives)
+      - [args](#args)
+      - [await](#await)
+      - [Exit code for the process](#exit-code-for-the-process)
+
+
 ### General Structure of C# Program
 
 * C# programs consist of one or more files. 
@@ -120,7 +132,8 @@ Launch profile window will open. Pass the arguments in command line arguments te
 
 ![Cmdline Args](../CSharpProgramStructure/Images/GPS2.png)
 
-##### Run the program
+**Run the program**
+
 Now run the program with arguments. The arguments will be parsed  in the `Main` method and will be displayed in the output:
 
 ```cs
@@ -182,7 +195,6 @@ To return an `int` value when the application ends, use the `return` statement a
 
 ```cs
 string? s = Console.ReadLine();
-
 int returnValue = int.Parse(s ?? "-1");
 return returnValue;
 ```
