@@ -175,3 +175,14 @@ If we run our app, we’ll see the ToString() built-in formatted we mentioned ea
 ```
 Employee { FirstName = Jane, LastName = Doe, Job = Programmer }
 ```
+
+### When to Use Records
+We’ve discussed a lot of the features of records, and syntactic sugar aside, it should be clear there are a number of benefits, and it should be a first-class citizen in our programming toolbelt. We will not compare records vs classes vs structs, as that is outside of the scope and an extensive topic, but in terms of performance let’s treat classes and records (reference types) the same, whilst structs (value types) are for simple types where no inheritance of complex domain modeling is required. So, let’s focus on the classes vs records use cases.
+
+**Immutability**
+
+The main advice for records over classes so far is when we want to have immutable objects that don’t need to change state, and are passed around different threads/classes. An obvious example here would be a DTO or an input model. These are one-way objects that get properties set, and are passed along. These are now perfect candidates for records. 
+
+**Concise Code**
+
+Furthermore, we’ve seen how simple and concise writing records are. Less code means better code and a smaller codebase, which means easier maintenance. The fact that we can declare an object with auto-initialized properties and built-in formatting with a single line is a very consice and useful feature.
