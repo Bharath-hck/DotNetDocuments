@@ -107,9 +107,12 @@ namespace ADOUsingStoredProcedure
                     };
 
                     connection.Open();
-                    Int32 count = Convert.ToInt32 = cmd.ExecuteReader();
-                    Console.WriteLine(" No. of Rows " + count);
-                 
+                    SqlDataReader sdr = cmd.ExecuteReader();
+
+                    while (sdr.Read())
+                    {
+                        Console.WriteLine(sdr["Id"] + ",  " + sdr["Name"] + ",  " + sdr["Email"] + ",  " + sdr["Mobile"]);
+                    }
                 }
             }
             catch (Exception ex)
@@ -225,35 +228,6 @@ public class Program
 ```
 #### Example to Call a Stored Procedure with Execute Scalar:
 
-Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
 
-```cs
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        try
-        {
-            string ConnectionString = @"data source=localhost; database=StudentDB; user id=sa; password=admin@123";
 
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                SqlCommand cmd = new SqlCommand("spGetStudents", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-
-                connection.Open();
-                Int32 count = Convert.ToInt32(cmd.ExecuteScalar());
-                Console.WriteLine("First Row First Column Value" + count);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception Occurred: {ex.Message}");
-        }
-        Console.ReadKey();
-    }
-}   
-```
 
