@@ -192,7 +192,7 @@ public class Program
     }
 }
 ```
-#### Example to Call a Stored Procedure with SQL Data Adapter:
+#### SQL Data Adapter
 
 Now let's use SQL Data Adapter to call the stored procedure:
 
@@ -226,8 +226,115 @@ public class Program
     }
 }   
 ```
-#### Example to Call a Stored Procedure with Execute Scalar:
+#### Execute Scalar
+
+Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+
+```cs
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        SqlConnection connection = null;
+        try
+        {
+            string connectionString = @"data source=localhost; database=StudentDB; user id=sa; password=admin@123";
+
+            using (connection = new SqlConnection(connectionString))
+            {
+
+                SqlCommand cmd = new SqlCommand("spGetStudentS", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
 
+                connection.Open();
 
+                int result = Convert.ToInt32(cmd.ExecuteScalar());
+                Console.WriteLine("First Row and First Column Value is: " + result);
+            }                
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception Occurred: {ex.Message}");
+        }
 
+        Console.ReadKey();
+    }
+}   
+```
+
+#### Execute Non-Query
+
+Executes a Transact-SQL statement against the connection and returns the number of rows affected.
+
+##### Inserting record 
+
+```cs
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        string connectionString = @"data source=localhost; database=StudentDB; user id=sa; password=admin@123";
+        try
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("INSERT INTO Student (Name, Email, Mobile) VALUES (@Name, @Email, @Mobile)", con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@Name", "Janakiraman");
+                    cmd.Parameters.AddWithValue("@Email", "jraman@gmail.com");
+                    cmd.Parameters.AddWithValue("@Mobile", "6662224444");
+
+                    con.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    con.Close();
+                    Console.WriteLine($"Rows Affected:{rowsAffected}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception Occurred: {ex.Message}");
+        }
+
+        Console.ReadKey();          
+    }
+}   
+```
+
+##### Deleting record 
+
+```cs
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        string connectionString = @"data source=localhost; database=StudentDB; user id=sa; password=admin@123";
+        try
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("DELETE FROM Student WHERE Id=@Id", con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@Id", 106);
+
+                    con.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    con.Close();
+                    Console.WriteLine($"Rows Affected:{rowsAffected}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception Occurred: {ex.Message}");
+        }
+
+        Console.ReadKey();          
+    }
+}   
+```
