@@ -130,17 +130,9 @@ The built-in IoC container supports three kinds of lifetimes:
 * **Scoped**: IoC container will create an instance of the specified service type once per request and will be shared in a single request.
 
 ```cs
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddSingleton<ILog, Logger>();
-    services.AddSingleton(typeof(ILog), typeof(Logger));
-
-    services.AddTransient<ILog, Logger>();
-    services.AddTransient(typeof(ILog), typeof(Logger));
-
-    services.AddScoped<ILog, Logger>();
-    services.AddScoped(typeof(ILog), typeof(Logger));
-}
+builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();
 ```
 
 #### Dependency Injection Example
@@ -246,6 +238,8 @@ public class CategoryController : Controller
 }
 ```
 Run the application (`Ctrl`+`F5`) and we will be able to see the result of the GET method of `CategoryController`. Now, even though we haven’t created an instance of `CategoryRepository` which is expected by CategoryController, we are able to call the GET method successfully. The instance of `CategoryRepository` has been resolved dynamically though our Dependency Injection.
+
+#### Output (Response in browser)
 
 ![Object](../Overview/Images/CategoryBrowserOutput.png)
 
