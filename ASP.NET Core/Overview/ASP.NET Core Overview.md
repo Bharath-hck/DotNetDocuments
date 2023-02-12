@@ -239,7 +239,146 @@ public class CategoryController : Controller
 ```
 Run the application (`Ctrl`+`F5`) and we will be able to see the result of the GET method of `CategoryController`. Now, even though we haven’t created an instance of `CategoryRepository` which is expected by CategoryController, we are able to call the GET method successfully. The instance of `CategoryRepository` has been resolved dynamically though our Dependency Injection.
 
-#### Output (Response in browser)
+#### Output (Response in browser) 
 
 ![Object](../Overview/Images/CategoryBrowserOutput.png)
 
+### Middleware
+
+Middleware is software that's assembled into an app pipeline to handle requests and responses. Each component:
+
+* Chooses whether to pass the request to the next component in the pipeline.
+* Can perform work before and after the next component in the pipeline.
+
+Request delegates are used to build the request pipeline. The request delegates handle each HTTP request.
+
+Request delegates are configured using `Run`, `Map`, and `Use` extension methods. An individual request delegate can be specified in-line as an anonymous method (called in-line middleware), or it can be defined in a reusable class. These reusable classes and in-line anonymous methods are **middleware**, also called **middleware components**. Each middleware component in the request pipeline is responsible for invoking the next component in the pipeline or short-circuiting the pipeline. When a middleware short-circuits, it's called a `terminal middleware` because it prevents further middleware from processing the request.
+
+#### Create a middleware pipeline with WebApplication
+
+The ASP.NET Core request pipeline consists of a sequence of request delegates, called one after the other. The following diagram demonstrates the concept. The thread of execution follows the black arrows.
+
+![Object](../Overview/Images/Request-Delegate-Pipeline.png)
+
+Each delegate can perform operations before and after the next delegate. **Exception-handling** delegates should be called early in the pipeline, so they can catch exceptions that occur in later stages of the pipeline.
+
+The simplest possible ASP.NET Core app sets up a single request delegate that handles all requests. This case doesn't include an actual request pipeline. Instead, a single anonymous function is called in response to every HTTP request.
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.Run(async context =>
+{
+    await context.Response.WriteAsync("Hello world!");
+});
+
+app.Run();
+```
+#### Use
+Chain multiple request delegates together with `Use`. The next parameter represents the next delegate in the pipeline. You can short-circuit the pipeline by not calling the next parameter. You can typically perform actions both before and after the next delegate, as the following example demonstrates:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    // Do work that can write to the Response.
+    await next.Invoke();
+    // Do logging or other work that doesn't write to the Response.
+});
+
+app.Run(async context =>
+{
+    await context.Response.WriteAsync("Hello from 2nd delegate.");
+});
+
+app.Run();
+```
+When a delegate doesn't pass a request to the next delegate, it's called `short-circuiting` the request pipeline. Short-circuiting is often desirable because it avoids unnecessary work.
+
+#### Run
+
+* `Run` delegates don't receive a next parameter. 
+* The first `Run` delegate is always terminal and terminates the pipeline. Run is a convention. 
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    // Do work that can write to the Response.
+    await next.Invoke();
+    // Do logging or other work that doesn't write to the Response.
+});
+
+app.Run(async context =>
+{
+    await context.Response.WriteAsync("Hello from 2nd delegate.");
+});
+
+app.Run();
+```
+#### Middleware order
+
+The following diagram shows the complete request processing pipeline for ASP.NET Core MVC and Razor Pages apps. You can see how, in a typical app, existing middlewares are ordered and where custom middlewares are added. You have full control over how to reorder existing middlewares or inject new custom middlewares as necessary for your scenarios.
+
+
+![Object](../Overview/Images/middleware-pipeline.svg)
+
+The **Endpoint** middleware in the preceding diagram executes the filter pipeline for the corresponding app type—MVC or Razor Pages.
+
+The **Routing** middleware in the preceding diagram is shown following Static Files. This is the order that the project templates implement by explicitly calling `app.UseRouting`. If you don't call `app.UseRouting`, the Routing middleware runs at the beginning of the pipeline by default
+
+![Object](../Overview/Images/mvc-endpoint.svg)
+
+The order that middleware components are added in the Program.cs file defines the order in which the middleware components are invoked on requests and the reverse order for the response. The order is critical for security, performance, and functionality.
+
+The following highlighted code in `Program.cs` adds security-related middleware components in the typical recommended order:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddRazorPages();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint();
+}
+else
+{
+    app.UseExceptionHandler("/Error");    
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseCookiePolicy();
+app.UseRouting();
+app.UseRequestLocalization();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseSession();
+app.UseResponseCompression();
+app.UseResponseCaching();
+app.MapRazorPages();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+```
