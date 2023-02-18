@@ -382,3 +382,200 @@ app.MapControllerRoute(
 
 app.Run();
 ```
+
+### Host
+
+On startup, an ASP.NET Core app builds a `host`. The host encapsulates all of the app's resources, such as:
+
+* An HTTP server implementation
+* Middleware components
+* Logging
+* Dependency injection (DI) services
+* Configuration
+
+There are three different hosts:
+
+* .NET WebApplication Host (Minimal Host)
+* .NET Generic Host
+* ASP.NET Core Web Host
+
+The .NET WebApplication Host is recommended and used in all the ASP.NET Core templates. The .NET WebApplication Host and .NET Generic Host share many of the same interfaces and classes. The ASP.NET Core Web Host is available only for backward compatibility.
+
+The following example instantiates a WebApplication Host:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+```
+
+The `WebApplicationBuilder.Build` method configures a `host` with a set of `default options`, such as:
+
+* Use `Kestrel` as the web server and enable IIS integration.
+* Load configuration from `appsettings.json`, `environment variables`, `command line arguments`, and other configuration sources.
+* Send logging output to the `console` and `debug` providers.
+
+#### Non-web scenarios
+The **Generic Host** allows other types of apps to use cross-cutting framework extensions, such as logging, dependency injection (DI), configuration, and app lifetime management
+
+* Background tasks with hosted services in ASP.NET Core
+
+### Servers
+
+An ASP.NET Core app runs with an `in-process HTTP server` implementation. 
+The server implementation listens for `HTTP requests` and surfaces them to the app as a set of request features composed into an `HttpContext`.
+
+ASP.NET Core ships with the following:
+
+#### Kestrel
+> `Kestrel` server is the default, cross-platform HTTP server implementation. Kestrel provides the best performance and memory utilization, but it doesn't have some of the advanced features in `HTTP.sys`
+
+#### IIS HTTP Server
+> `IIS HTTP Server` is an in-process server for IIS
+
+#### HTTP.sys Server
+> `HTTP.sys` server is a **Windows-only** HTTP server based on the `HTTP.sys kernel driver` and `HTTP Server API`
+
+#### Kestrel vs. HTTP.sys
+
+**Kestrel** has the following advantages over **HTTP.sys**:
+
+* Better performance and memory utilization.
+* Cross platform
+* Agility, it's developed and patched independent of the OS.
+* Programmatic port and TLS configuration
+* Extensibility that allows for protocols like `PPv2` and alternate transports.
+
+
+**Http.Sys** operates as a shared kernel mode component with the following features that **kestrel** does not have:
+
+* Port sharing
+* Kernel mode windows authentication. Kestrel supports only user-mode authentication.
+* Fast proxying via queue transfers
+* Direct file transmission
+* Response caching
+
+#### Hosting models
+
+**In-process Hosting**
+* Using in-process hosting, an ASP.NET Core app runs in the same process as its IIS worker process
+* IIS handles process management with the Windows Process Activation Service (WAS).
+* In-process hosting provides improved performance over out-of-process hosting because requests aren't proxied over the `loopback adapter`, a network interface that returns outgoing network traffic back to the same machine
+
+**Out-of-process hosting**
+* Using out-of-process hosting, ASP.NET Core apps run in a process separate from the IIS worker process
+* Module handles process management. The module starts the process for the ASP.NET Core app when the first request arrives and restarts the app if it shuts down or crashes
+* Using a separate process also enables hosting more than one app from the same app pool.
+
+#### Kestrel
+
+* `Kestrel` server is the default, cross-platform HTTP server implementation. 
+* `Kestrel` provides the best performance and memory utilization, but it doesn't have some of the advanced features in `HTTP.sys`
+
+Use Kestrel:
+
+  * By itself as an edge server processing requests directly from a network, including the Internet.
+
+![Object](../Overview/Images/kestrel-to-internet2.png)
+
+  * With a reverse proxy server, such as `Internet Information Services (IIS)`, `Nginx`, or `Apache`. A reverse proxy server receives HTTP requests from the Internet and forwards them to Kestrel.
+
+![Object](../Overview/Images/kestrel-to-internet.png)
+
+
+Either hosting configuration—with or without a reverse proxy server—is supported.
+
+#### HTTP.sys
+
+If ASP.NET Core apps are run on Windows, `HTTP.sys` is an alternative to `Kestrel`. `Kestrel` is recommended over `HTTP.sys` unless the app requires features not available in Kestrel
+
+![Object](../Overview/Images/httpsys-to-internet.png)
+
+`HTTP.sys` can also be used for apps that are only exposed to an internal network.
+
+![Object](../Overview/Images/httpsys-to-internal.png)
+
+
+### Configuration
+
+Application configuration in ASP.NET Core is performed using one or more `configuration providers`. `Configuration providers` read configuration data from key-value pairs using a variety of configuration sources:
+
+* Settings files, such as appsettings.json
+* Environment variables
+* Azure Key Vault
+* Azure App Configuration
+* Command-line arguments
+* Custom providers, installed or created
+* Directory files
+* In-memory .NET objects
+
+#### appsettings.json
+
+Consider the following `appsettings.json` file:
+
+```json
+{
+  "Position": {
+    "Title": "Editor",
+    "Name": "Joe Smith"
+  },
+  "MyKey": "My appsettings.json Value",
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+The following code displays several of the preceding configurations settings:
+
+```cs
+public class TestModel : PageModel
+{
+    // requires using Microsoft.Extensions.Configuration;
+    private readonly IConfiguration Configuration;
+
+    public TestModel(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public ContentResult OnGet()
+    {
+        var myKeyValue = Configuration["MyKey"];
+        var title = Configuration["Position:Title"];
+        var name = Configuration["Position:Name"];
+        var defaultLogLevel = Configuration["Logging:LogLevel:Default"];
+
+
+        return Content($"MyKey value: {myKeyValue} \n" +
+                       $"Title: {title} \n" +
+                       $"Name: {name} \n" +
+                       $"Default Log Level: {defaultLogLevel}");
+    }
+}
+```
+
+#### Configuration providers
+
+The following table shows the configuration providers available to ASP.NET Core apps.
+
+Provider | Provides configuration from
+---------|----------------------------
+Azure Key Vault configuration provider | Azure Key Vault
+Azure App configuration provider | Azure App Configuration
+Command-line configuration provider | Command-line parameters
+Custom configuration provider | Custom source
+Environment Variables configuration provider | Environment variables
+File configuration provider | INI, JSON, and XML files
+Key-per-file configuration provider | Directory files
+Memory configuration provider | In-memory collections
+User secrets | File in the user profile directory
