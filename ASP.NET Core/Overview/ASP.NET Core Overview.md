@@ -579,3 +579,308 @@ File configuration provider | INI, JSON, and XML files
 Key-per-file configuration provider | Directory files
 Memory configuration provider | In-memory collections
 User secrets | File in the user profile directory
+
+### Options
+
+The preferred way to read related configuration values is using the `options` pattern. For example, to read the following configuration values:
+
+```json
+ "Position": {
+    "Title": "Editor",
+    "Name": "Joe Smith"
+  }
+```
+Create the following `PositionOptions` class:
+
+
+```cs
+public class PositionOptions
+{
+    public const string Position = "Position";
+
+    public string Title { get; set; } = String.Empty;
+    public string Name { get; set; } = String.Empty;
+}
+
+```
+
+The following code:
+
+* Calls ConfigurationBinder.Bind to bind the PositionOptions class to the Position section.
+* Displays the Position configuration data.
+
+```cs
+public class IndexModel : PageModel
+{
+    private readonly IConfiguration Configuration;
+
+    public IndexModel(IConfiguration configuration)
+    {
+        Configuration = configuration;  
+    }
+
+    public ContentResult OnGet()
+    {
+        var positionOptions = new PositionOptions();
+        Configuration.GetSection(PositionOptions.Posïtion).Bind(positionOptions);
+        return Content($"Title: {positionOptions.Title} \n" + $"Name: {positionOptions.Name}");
+    }
+}
+```
+
+* An alternative approach when using the `options` pattern is to bind the `Position` section and add it to the dependency injection service container. 
+* In the following code, `PositionOptions` is added to the service container with Configure and bound to configuration:
+
+```cs
+using ConfigSample.Options;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
+
+builder.Services.Configure<PositionOptions>(builder.Configuration.GetSection(PositionOptions.Position));
+
+var app = builder.Build();
+```
+
+The following code reads the position options:
+
+```cs
+public class IndexModel : PageModel
+{
+    private readonly PositionOptions positionOptions;
+
+    public IndexModel(IOptions<PositionOptions> positionOptions)
+    {
+        this.positionOptions = positionOptions.Value; 
+    }
+
+    public ContentResult OnGet()
+    {
+        return Content($"Title: {this.positionOptions.Title} \n" + $"Name: {this.positionOptions.Name}");
+    }
+}
+```
+
+### Environments (dev, stage, prod)
+
+ASP.NET Core configures app behavior based on the runtime environment using an environment variable.
+
+To determine the runtime environment, ASP.NET Core reads from the following environment variables:
+
+* `DOTNET_ENVIRONMENT`
+* `ASPNETCORE_ENVIRONMENT` when the `WebApplication`.`CreateBuilder` method is called. The default ASP.NET Core web app templates call `WebApplication`.`CreateBuilder`. The `DOTNET_ENVIRONMENT` value overrides `ASPNETCORE_ENVIRONMENT` when `WebApplicationBuilder` is used.
+
+`IHostEnvironment`.`EnvironmentName` can be set to any value, but the following values are provided by the framework:
+
+* `Development`
+* `Staging`
+* `Production`
+
+**Note:**
+The `launchSettings.json` file sets `ASPNETCORE_ENVIRONMENT` to `Development` on the local machine
+The default if `DOTNET_ENVIRONMENT` and `ASPNETCORE_ENVIRONMENT` have not been set
+
+#### Set environment on the command line
+
+```properties
+dotnet run --environment Production
+```
+
+### Logging
+
+This topic describes `logging` in .NET as it applies to ASP.NET Core apps. 
+
+#### Logging providers
+
+Logging providers store logs, except for the `Console` provider which displays logs. For example, the Azure Application Insights provider stores logs in Azure Application Insights. Multiple providers can be enabled.
+
+The default ASP.NET Core web app templates:
+
+* Use the `Generic Host`.
+* Call WebApplication.CreateBuilder, which adds the following logging providers:
+  * `Console`
+  * `Debug`
+  * `EventSource`
+  * `EventLog`: Windows only
+
+The following code overrides the default set of logging providers added by `WebApplication`.`CreateBuilder`:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+builder.Services.AddRazorPages();
+
+```
+
+#### Create logs
+
+To create logs, use an `ILogger<TCategoryName>` object from `dependency injection (DI)`.
+
+The following example:
+
+* Creates a logger, `ILogger<IndexModel>`, which uses a log category of the fully qualified name of the type `IndexModel`. 
+* The log category is a string that is associated with each log.
+* Calls `LogInformation` to log at the `Information` level. The Log `level` indicates the severity of the logged event.
+
+
+```cs
+public class IndexModel : PageModel
+{
+    private readonly PositionOptions positionOptions;
+    private readonly ILogger _logger;
+
+    public IndexModel(IOptions<PositionOptions> positionOptions, ILogger<IndexModel> logger)
+    {
+        this.positionOptions = positionOptions.Value;
+        _logger = logger;
+    }
+
+    public ContentResult OnGet()
+    {
+        _logger.LogInformation("Book Home Page visited at {DT}", DateTime.UtcNow.ToLongTimeString());
+        return Content($"Title: {this.positionOptions.Title} \n" + $"Name: {this.positionOptions.Name}");
+    }
+}
+```
+
+#### Configure logging
+
+Logging configuration is commonly provided by the Logging section of `appsettings.{ENVIRONMENT}.json` files, where the `{ENVIRONMENT}` placeholder is the environment. The following `appsettings.Development.json` file is generated by the ASP.NET Core web app templates:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+```
+
+The `Logging` property can have `LogLevel` and log provider properties. The `LogLevel` specifies the minimum level to log for selected categories. 
+
+`Trace` = 0, `Debug` = 1, `Information` = 2, `Warning` = 3, `Error` = 4, `Critical` = 5, and `None` = 6.
+
+#### Log in `Program.cs`
+
+The following example calls `Builder.WebApplication.Logger` in `Program.cs` and logs informational messages:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+app.Logger.LogInformation("Adding Routes");
+app.MapGet("/", () => "Hello World!");
+app.Logger.LogInformation("Starting the app");
+app.Run();
+```
+
+#### HTTP Logging in ASP.NET Core
+
+HTTP Logging is a middleware that logs information about incoming HTTP requests and HTTP responses. HTTP logging provides logs of:
+
+* HTTP request information
+* Common properties
+* Headers
+* Body
+* HTTP response information
+
+HTTP Logging is valuable in several scenarios to:
+
+* Record information about incoming requests and responses.
+* Filter which parts of the request and response are logged.
+* Filtering which headers to log.
+
+HTTP Logging _can reduce the performance of an app_, especially when logging the request and response bodies. Consider the performance impact when selecting fields to log. Test the performance impact of the selected logging properties.
+
+#### Enabling HTTP logging
+
+HTTP Logging is enabled with `UseHttpLogging`, which adds HTTP logging middleware.
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+app.UseHttpLogging();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+}
+app.UseStaticFiles();
+app.MapGet("/", () => "Hello World!");
+app.Run();
+```
+
+By default, HTTP Logging logs common properties such as path, status-code, and headers for requests and responses. Add the following line to the `appsettings.Development.json` file at the `"LogLevel": {` level so the HTTP logs are displayed:
+
+```json
+"Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
+```
+
+The output is logged as a single message at `LogLevel.Information`.
+
+```log
+info: Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware[1]
+      Request:
+      Protocol: HTTP/2
+      Method: GET
+      Scheme: https
+      PathBase:
+      Path: /Books
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+      Host: localhost:7056
+      User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+      Accept-Encoding: gzip, deflate, br
+      Accept-Language: en-US,en;q=0.9
+      Upgrade-Insecure-Requests: [Redacted]
+      sec-ch-ua: [Redacted]
+      sec-ch-ua-mobile: [Redacted]
+      sec-ch-ua-platform: [Redacted]
+      sec-fetch-site: [Redacted]
+      sec-fetch-mode: [Redacted]
+      sec-fetch-user: [Redacted]
+      sec-fetch-dest: [Redacted]
+```
+
+#### W3CLogger in ASP.NET Core
+
+`W3CLogger` is a middleware that writes log files in the `W3C standard` format. The logs contain information about HTTP requests and HTTP responses. W3CLogger provides logs of:
+
+* HTTP request information
+* Common properties
+* Headers
+* HTTP response information
+* Metadata about the request/response pair (date/time started, time taken)
+
+W3CLogger is valuable in several scenarios to:
+
+* Record information about incoming requests and responses.
+* Filter which parts of the request and response are logged.
+* Filter which headers to log.
+
+`W3CLogger` _can reduce the performance of an app_. Consider the performance impact when selecting fields to log - the performance reduction will increase as you log more properties. Test the performance impact of the selected logging properties.
+
+#### Enable W3CLogger
+
+Enable `W3CLogger` with `UseW3CLogging`, which adds the W3CLogger middleware:
+
+```cs
+var app = builder.Build();
+app.UseW3CLogging();
+app.UseRouting();
+```
+
+By default, `W3CLogger` logs common properties such as path, status-code, date, time, and protocol. All information about a single request/response pair is written to the same line.
+
+```log
+#Version: 1.0
+#Start-Date: 2021-09-29 22:18:28
+#Fields: date time c-ip s-computername s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status time-taken cs-version cs-host cs(User-Agent) cs(Referer)
+2021-09-29 22:18:28 ::1 DESKTOP-LH3TLTA ::1 5000 GET / - 200 59.9171 HTTP/1.1 localhost:5000 Mozilla/5.0+(Windows+NT+10.0;+WOW64)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/93.0.4577.82+Safari/537.36 -
+2021-09-29 22:18:28 ::1 DESKTOP-LH3TLTA ::1 5000 GET / - 200 0.1802 HTTP/1.1 localhost:5000 Mozilla/5.0+(Windows+NT+10.0;+WOW64)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/93.0.4577.82+Safari/537.36 -
+2021-09-29 22:18:30 ::1 DESKTOP-LH3TLTA ::1 5000 GET / - 200 0.0966 HTTP/1.1 localhost:5000 Mozilla/5.0+(Windows+NT+10.0;+WOW64)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/93.0.4577.82+Safari/537.36 -
+
+```
