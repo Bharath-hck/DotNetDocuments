@@ -884,3 +884,274 @@ By default, `W3CLogger` logs common properties such as path, status-code, date, 
 2021-09-29 22:18:30 ::1 DESKTOP-LH3TLTA ::1 5000 GET / - 200 0.0966 HTTP/1.1 localhost:5000 Mozilla/5.0+(Windows+NT+10.0;+WOW64)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/93.0.4577.82+Safari/537.36 -
 
 ```
+
+### HttpContext
+
+* `HttpContext` encapsulates all information about an individual HTTP request and response. 
+* An `HttpContext` instance is initialized when an HTTP request is received. 
+* The HttpContext instance is accessible by middleware and app frameworks such as `Web API controllers`, `Razor Pages`, `SignalR`, `gRPC`, and more.
+
+#### HttpRequest
+
+* `HttpContext`.`Request` provides access to HttpRequest. 
+* `HttpRequest` has information about the incoming HTTP request
+* It is initialized when an HTTP request is received by the server. 
+* `HttpRequest` isn't read-only, and `middleware` can change request values in the middleware pipeline.
+
+Commonly used members on `HttpRequest` include:
+
+Property | Description | Example
+---------|-------------|--------
+HttpRequest.Path | The request path. | /en/article/getstarted
+HttpRequest.Method | The request method. | GET
+HttpRequest.Headers | A collection of request headers. | user-agent=Edge x-custom-header=MyValue
+HttpRequest.RouteValues | A collection of route values. The collection is set when the request is matched to a route. | language=en article=getstarted
+HttpRequest.Query | A collection of query values parsed from QueryString. | filter=hello page=1
+HttpRequest.ReadFormAsync() | A method that reads the request body as a form and returns a form values collection. For information about why ReadFormAsync should be used to access form data, see Prefer ReadFormAsync over Request.Form. | email=user@contoso.com password=TNkt4taM
+HttpRequest.Body | A Stream for reading the request body. | UTF-8 JSON payload
+
+#### Get request headers
+* `HttpRequest.Headers` provides access to the request headers sent with the HTTP request. There are two ways to access headers using this collection:
+
+* Provide the header name to the indexer on the header collection. The header name isn't case-sensitive. The indexer can access any header value.
+* The header collection also has properties for getting and setting commonly used HTTP headers. The properties provide a fast, IntelliSense driven way to access headers.
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", (HttpRequest request) =>
+{
+    var userAgent = request.Headers.UserAgent;
+    var customHeader = request.Headers["x-custom-header"];
+
+    return Results.Ok(new { userAgent = userAgent, customHeader = customHeader });
+});
+
+app.Run();
+
+```
+
+#### HttpResponse
+
+`HttpContext`.`Response` provides access to HttpResponse. `HttpResponse` is used to set information on the HTTP response sent back to the client.
+
+Commonly used members on `HttpResponse` include:
+
+Property | Description | Example
+---------|-------------|--------
+HttpResponse.StatusCode | The response code. Must be set before writing to the response body. | 200
+HttpResponse.ContentType | The response content-type header. Must be set before writing to the response body. | application/json
+HttpResponse.Headers | A collection of response headers. Must be set before writing to the response body. | server=Kestrel x-custom-header=MyValue
+HttpResponse.Body | A Stream for writing the response body. | Generated web page
+
+#### Set response headers
+
+`HttpResponse`.`Headers` provides access to the response headers sent with the HTTP response. There are two ways to access headers using this collection:
+
+* Provide the header name to the indexer on the header collection. The header name isn't case-sensitive. The indexer can access any header value.
+* The header collection also has properties for getting and setting commonly used HTTP headers. The properties provide a fast, IntelliSense driven way to access headers.
+
+**Note:**
+* An app can't modify headers after the response has started. 
+* Once the response starts, the headers are sent to the client. 
+* An error is thrown when attempting to modify headers after the response has started:
+> System.InvalidOperationException: Headers are read-only, response has already started.
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", (HttpResponse response) =>
+{
+    response.Headers.CacheControl = "no-cache";
+    response.Headers["x-custom-header"] = "Custom value";
+
+    return Results.File(File.OpenRead("helloworld.txt"));
+});
+
+app.Run();
+```
+
+### Routing in ASP.NET Core
+
+* Routing is responsible for matching incoming HTTP requests and dispatching those requests to the app's executable endpoints. 
+* Endpoints are the app's units of executable request-handling code. 
+* Endpoints are defined in the app and configured when the app starts. 
+* The endpoint matching process can extract values from the request's URL and provide those values for request processing. 
+* Using endpoint information from the app, routing is also able to generate URLs that map to endpoints.
+
+#### Routing basics
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");
+
+app.Run();
+```
+
+The preceding example includes a single endpoint using the MapGet method:
+
+* When an HTTP `GET` request is sent to the root URL `/`:
+* The request delegate executes.
+* `Hello World!` is written to the HTTP response.
+* If the request method is not `GET` or the root URL is not `/`, no route matches and an `HTTP 404` is returned.
+
+#### Endpoints
+
+The `MapGet` method is used to define an endpoint. An endpoint is something that can be:
+
+* Selected, by matching the URL and HTTP method.
+* Executed, by running the delegate.
+
+#### URL matching
+* Is the process by which routing matches an incoming request to an endpoint.
+* Is based on data in the URL path and headers.
+* Can be extended to consider any data in the request.
+
+When a routing middleware executes, it sets an Endpoint and route values to a request feature on the HttpContext from the current request:
+
+* Calling `HttpContext`.`GetEndpoint` gets the endpoint.
+* `HttpRequest`.`RouteValues` gets the collection of route values.
+
+### Error Handling in ASP.NET Core
+
+The below section talks about the common approaches to handling errors in ASP.NET Core web apps
+
+#### Developer exception page
+
+The _Developer Exception Page_ displays detailed information about unhandled request exceptions. ASP.NET Core apps enable the developer exception page by default when both:
+
+* Running in the `Development` environment.
+* App created with the current templates, that is, using `WebApplication.CreateBuilder`. Apps created using the `WebHost.CreateDefaultBuilder` must enable the developer exception page by calling `app.UseDeveloperExceptionPage` in Configure.
+
+The developer exception page runs early in the middleware pipeline, so that it can catch unhandled exceptions thrown in middleware that follows. Detailed exception information shouldn't be displayed publicly when the app runs in the `Production` environment.
+
+The Developer Exception Page can include the following information about the exception and the request:
+
+* `Stack trace`
+* `Query string parameters`
+* `Cookies`
+* `Headers`
+
+The Developer Exception Page isn't guaranteed to provide any information. Use `Logging` for complete error information.
+
+#### Exception handler page
+
+To configure a custom error handling page for the Production environment, call `UseExceptionHandler`.
+
+```cs
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+```
+
+> **Warning**
+> Do not serve sensitive error information to clients. Serving errors is a security risk.
+
+### Make HTTP requests 
+
+* Make HTTP requests using `IHttpClientFactory` in ASP.NET Core
+* An `IHttpClientFactory` can be registered and used to configure and create `HttpClient` instances in an app
+
+#### Example
+
+Register `IHttpClientFactory` by calling `AddHttpClient` in `Program.cs`:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddHttpClient();
+```
+
+An `IHttpClientFactory` can be requested using `dependency injection (DI)`. The following code uses `IHttpClientFactory` to create an `HttpClient` instance:
+
+```cs
+public class BasicModel : PageModel
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public BasicModel(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+
+    public IEnumerable<GitHubBranch>? GitHubBranches { get; set; }
+
+    public async Task OnGet()
+    {
+        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/dotnet/AspNetCore.Docs/branches")
+        {
+            Headers =
+            {
+                { HeaderNames.Accept, "application/vnd.github.v3+json" },
+                { HeaderNames.UserAgent, "HttpRequestsSample" }
+            }
+        };
+
+        var httpClient = _httpClientFactory.CreateClient();
+        var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+
+        if (httpResponseMessage.IsSuccessStatusCode)
+        {
+            using var contentStream =
+                await httpResponseMessage.Content.ReadAsStreamAsync();
+            
+            GitHubBranches = await JsonSerializer.DeserializeAsync
+                <IEnumerable<GitHubBranch>>(contentStream);
+        }
+    }
+}
+
+```
+
+### Static Files
+
+Static files, such as `HTML`, `CSS`, `images`, and `JavaScript`, are assets an ASP.NET Core app serves directly to clients by default.
+
+#### Serve static files
+
+* Static files are stored within the project's web root directory. 
+* The default directory is `{content root}/wwwroot`, but it can be changed with the `UseWebRoot` method. 
+
+```cs
+app.UseStaticFiles();
+```
+
+#### Serve files outside of web root
+
+Consider a directory hierarchy in which the static files to be served reside outside of the web root:
+
+* `wwwroot`
+  * `css`
+  * `images`
+  * `js`
+* `MyStaticFiles`
+  * `images`
+    * `red-rose.jpg`
+
+A request can access the red-rose.jpg file by configuring the Static File Middleware as follows:
+
+```cs
+using Microsoft.Extensions.FileProviders;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+// Using static file outside of wwwroot
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "MyStaticFiles")),
+    RequestPath = "/StaticFiles"
+});
+
+app.Run();
+```
