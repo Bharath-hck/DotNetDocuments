@@ -1053,6 +1053,7 @@ if (!app.Environment.IsDevelopment())
 ```
 
 > **Warning**
+> 
 > Do not serve sensitive error information to clients. Serving errors is a security risk.
 
 ### Make HTTP requests 
