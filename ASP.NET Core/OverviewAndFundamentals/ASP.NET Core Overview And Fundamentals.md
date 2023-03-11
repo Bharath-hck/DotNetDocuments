@@ -34,7 +34,7 @@ Ability to develop and run on `Windows`, `macOS`, and `Linux`
 
 ### ASP.NET Core Application Types
 
-![Object](../Overview/Images/ASP.NET%20Core.png)
+![Object](/ASP.NET%20Core/OverviewAndFundamentals/Images/ASP.NET%20Core.png)
 
 ### ASP.NET vs ASP.NET Core Comparison
 
