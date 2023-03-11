@@ -109,16 +109,17 @@ app.Run();
 <div class="form-group">
     <label>
         User:
-        <input @bind="userInput" />
+        <input class="form-control" @bind="userInput" />
     </label>
 </div>
+
 <div class="form-group">
     <label>
         Message:
-        <input @bind="messageInput" size="50" />
+        <input class="form-control" @bind="messageInput" size="50"/>
     </label>
 </div>
-<button @onclick="Send" disabled="@(!IsConnected)">Send</button>
+<button class="btn btn-info" @onclick="Send" disabled="@(!IsConnected)" style="margin-top:10px; color:white">Send</button>
 
 <hr>
 
