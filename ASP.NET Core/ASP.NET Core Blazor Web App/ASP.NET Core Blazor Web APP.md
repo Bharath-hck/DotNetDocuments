@@ -67,10 +67,10 @@ A request for `/counter` in the browser, as specified by the `@page` directive a
 
 Each time the **Click me** button is selected:
 
-* The onclick event is fired.
-* The IncrementCount method is called.
-* The currentCount is incremented.
-* The component is rendered to show the updated count.
+* The `onclick` event is fired.
+* The `IncrementCount` method is called.
+* The `currentCount` is incremented.
+* The `component` is rendered to show the updated count.
 
 
 ### Add a component
