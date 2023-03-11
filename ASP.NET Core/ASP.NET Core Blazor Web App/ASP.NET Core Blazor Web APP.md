@@ -1,6 +1,6 @@
 # ASP.NET Core Blazor Web APP
 
-## Practical Exercise 1
+## Practical Exercise I
 
 In this exercise, we will build a simple counter app with Blazor
 
@@ -156,3 +156,225 @@ Welcome to your new app.
 ![Image](/ASP.NET%20Core/ASP.NET%20Core%20Blazor%20Web%20App/Images/screenshot-blazor-tutorial-modify.png)
 
 ### Congratulations, you've built and run your first Blazor app!
+
+## Practical Exercise II
+
+### In this exercise, we will learn how to build and modify a Blazor app
+
+* Create a todo list Blazor app project
+* Modify Razor components
+* Use event handling and data binding in components
+* Use routing in a Blazor app
+
+At the end of this tutorial, you'll have a working todo list app.
+
+### Create a Blazor app
+
+1. Start **Visual Studio** and select **Create a new project**.
+2. In the **Create a new project** window, type **Blazor** on the search box and hit **Enter**.
+3. Select the **Blazor Server App** template and select Next.
+4. In the Configure your new project window, enter **TodoList** as the project name and select **Next**.
+5. In the Additional information window, select **.NET 7.0 (Standard Term Support)** in the Framework drop-down if not already selected and click the **Create** button.
+
+Your project is created and loaded in Visual Studio. Take a look at the contents of your project using **Solution Explorer**.
+
+### Build a todo list Blazor app
+
+1. Add a new `Todo` Razor component to the app under `Pages` folder
+2. Open the `Todo` component in any file editor and add an `@page` Razor directive to the top of the file with a relative URL of `/todo`.
+
+**Pages/Todo.razor:**
+
+```HTML+RAZOR
+@page "/todo"
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+@code {
+
+}
+```
+3. Save the `Pages/Todo.razor` file.
+4. Add the `Todo` component to the **navigation bar**.
+5. In the navigation element content of the `NavMenu` component, add the following <div> element for the `Todo` component.
+
+In **Shared/NavMenu.razor**:
+
+```HTML
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="todo">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Todo
+    </NavLink>
+</div>
+```
+6. Save the `Shared/NavMenu.razor` file.
+7. **Build** and **Run** the app
+8. Visit the new Todo page by selecting the **Todo** link in the app's navigation bar
+9. This loads the page  at `/todo`
+10. Add a `TodoItem.cs` file to the root of the project
+
+`TodoItem.cs:`
+
+```cs
+public class TodoItem
+{
+    public string? Title { get; set; }
+    public bool IsDone { get; set; }
+}
+```
+11. Return to the **Todo** component and perform the following tasks:
+
+    * Add a field for the todo items in the `@code` block. The **Todo** component uses this field to maintain the state of the todo list.
+    * Add unordered list markup and a foreach loop to render each **todo** item as a list item (`<li>`)
+  
+`Pages/Todo.razor:`
+
+```HTML+RAZOR
+@page "/todo"
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>@todo.Title</li>
+    }
+</ul>
+
+@code {
+    private List<TodoItem> todos = new();
+}
+```
+12. The app requires UI elements for adding **todo** items to the list. 
+13. Add a text input (`<input>`) and a button (`<button>`) below the unordered list (`<ul>...</ul>`):
+
+```HTML+RAZOR
+@page "/todo"
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>@todo.Title</li>
+    }
+</ul>
+
+<input placeholder="Something todo" />
+<button>Add todo</button>
+
+@code {
+    private List<TodoItem> todos = new();
+}
+```
+14. To get the title of the new todo item, add a `newTodo` string field at the top of the `@code` block:
+
+```cs
+private string? newTodo;
+```
+15. Modify the text `<input>` element to bind newTodo with the `@bind` attribute:
+
+```HTML+RAZOR
+<input placeholder="Something todo" @bind="newTodo" />
+```
+
+16. Update the `AddTodo` method to add the `TodoItem` with the specified `title` to the list. Clear the value of the text input by setting `newTodo` to an empty string:
+
+```HTML+RAZOR
+@page "/todo"
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>@todo.Title</li>
+    }
+</ul>
+
+<input placeholder="Something todo" @bind="newTodo" />
+<button @onclick="AddTodo">Add todo</button>
+
+@code {
+    private List<TodoItem> todos = new();
+    private string? newTodo;
+
+    private void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            todos.Add(new TodoItem { Title = newTodo });
+            newTodo = string.Empty;
+        }
+    }
+}
+```
+17. Save the `Pages/Todo.razor` file.
+18. The title text for each `todo` item can be made editable, and a checkbox can help the user keep track of completed items. Add a checkbox input for each todo item and bind its value to the IsDone property. Change `@todo.Title` to an `<input>` element bound to todo.Title with `@bind`:
+
+```HTML+RAZOR
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>
+            <input type="checkbox" @bind="todo.IsDone" />
+            <input @bind="todo.Title" />
+        </li>
+    }
+</ul>
+```
+
+19. Update the `<h1>` header to show a count of the number of todo items that aren't complete
+
+```HTML+RAZOR
+<h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
+```
+
+20. The completed **Todo** component (`Pages/Todo.razor`) looks like below:
+
+```HTML+RAZOR
+@page "/todo"
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
+
+<ul>
+    @foreach (var todo in todos)
+    {
+        <li>
+            <input type="checkbox" @bind="todo.IsDone" />
+            <input @bind="todo.Title" />
+        </li>
+    }
+</ul>
+
+<input placeholder="Something todo" @bind="newTodo" />
+<button @onclick="AddTodo">Add todo</button>
+
+@code {
+    private List<TodoItem> todos = new();
+    private string? newTodo;
+
+    private void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            todos.Add(new TodoItem { Title = newTodo });
+            newTodo = string.Empty;
+        }
+    }
+}
+```
+21. Save the `Pages/Todo.razor` file
+22. **Build** and **Run** the app
+23. Test the ToDo app by adding items and making some of the items as complete
+24. When finished, shut down the app in the command shell (<kbd>Ctrl</kbd> + <kbd>C</kbd>)
