@@ -171,3 +171,9 @@ app.Run();
     }
 }
 ```
+
+### Run the app
+
+1. Press <kbd>Ctrl</kbd> + <kbd>F5</kbd> (Windows) to run the app without debugging.
+2. Copy the URL from the address bar, open another browser instance or tab, and paste the URL in the address bar.
+3. Choose either browser, enter a name and message, and select the button to send the message. The name and message are displayed on both pages instantly:
